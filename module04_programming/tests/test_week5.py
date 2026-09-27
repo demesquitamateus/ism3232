@@ -23,3 +23,5 @@ def test_type_of_string():
 def test_type_conversion():
     s = "42"
     assert int(s) == 42
+
+# test
