@@ -1,4 +1,4 @@
-from modulefinder(week8_buggy) import get_total, is_over_limit, format_summary
+from week8_buggy import get_total, is_over_limit, format_summary
 
 def test_get_total_correct():
     recs = [{'amount': 100}, {'amount': 200}]
