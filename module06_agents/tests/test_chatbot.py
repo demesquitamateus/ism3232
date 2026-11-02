@@ -1,5 +1,6 @@
 from chatbot import SupportChatbot
 from order_tool import OrderLookup
+from stock_tool import StockLookup
 
 
 def make_bot():
@@ -59,3 +60,15 @@ def test_count_user_messages():
     bot.respond("hello")
     bot.respond("Where is order A100?")
     assert bot.count_user_messages() == 2
+
+
+def make_bot():
+    """Build a fresh chatbot with its own tool for each test."""
+    order_tool = OrderLookup({"A100": "shipped", "A101": "processing"})
+    stock_tool = StockLookup({"rain jacket": 12, "day pack": 0})
+    return SupportChatbot("Sunny", "Be friendly.", order_tool, stock_tool)
+
+
+def test_stock_question_uses_the_stock_tool():
+    bot = make_bot()
+    assert "12" in bot.respond("Is the rain jacket in stock?")

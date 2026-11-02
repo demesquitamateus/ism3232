@@ -1,5 +1,6 @@
 from chatbot import SupportChatbot
 from order_tool import OrderLookup
+from stock_tool import StockLookup
 
 ORDERS = {"A100": "shipped", "A101": "processing", "A102": "delivered"}
 
@@ -15,3 +16,18 @@ while user_message != "quit":
     user_message = input("You: ")
 
 print(f"Messages in this conversation: {len(bot.history)}")
+
+STOCK = {
+    "rain jacket": 12,
+    "day pack": 0,
+    "trail hat": 5,
+}
+
+order_tool = OrderLookup(ORDERS)
+stock_tool = StockLookup(STOCK)
+bot = SupportChatbot(
+    "Sunny",
+    "You are a friendly support assistant for Bayside Outfitters.",
+    order_tool,
+    stock_tool,
+)
