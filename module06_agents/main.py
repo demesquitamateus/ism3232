@@ -26,7 +26,7 @@ STOCK = {
 order_tool = OrderLookup(ORDERS)
 stock_tool = StockLookup(STOCK)
 bot = SupportChatbot(
-    "Sunny",
+    "Jim",
     "You are a friendly support assistant for Bayside Outfitters.",
     order_tool,
     stock_tool,

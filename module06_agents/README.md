@@ -1,0 +1,3 @@
+## Mini-Project: Ledge Climbing Gym FAQ Assistant
+
+Piper is a mock FAQ assistant for a made-up climbing gym. It answers questions about hours, prices, rentals, and parking by asking a separate `FaqBook` tool. It is mock because its replies come from keyword `if` rules and a hard-coded dictionary, with no AI model, no internet, and no real gym data. Anything mentioning a refund, cancellation, injury, or someone getting hurt goes to a staff member, because those involve money or safety and a person needs to decide. If it used real customer data, an injury reported in words not on my list (like "I fell off the wall") would never reach a person, and the member would get a useless reply.

@@ -2,10 +2,12 @@ HANDOFF_WORDS = ["address", "payment", "card"]
 
 
 class SupportChatbot:
-    def __init__(self, name, instructions, order_tool):
+    def __init__(self, name, instructions, order_tool, stock_tool):
+        """Set up one chatbot with its own name, instructions, tools, and history."""
         self.name = name
         self.instructions = instructions
         self.order_tool = order_tool
+        self.stock_tool = stock_tool
         self.history = []
 
     def respond(self, user_message):
@@ -47,14 +49,6 @@ class SupportChatbot:
             if message["role"] == "user":
                 count += 1
         return count
-
-    def __init__(self, name, instructions, order_tool, stock_tool):
-        """Set up one chatbot with its own name, instructions, tools, and history."""
-        self.name = name
-        self.instructions = instructions
-        self.order_tool = order_tool
-        self.stock_tool = stock_tool
-        self.history = []
 
     def stock_reply(self, user_message):
         """Use the stock tool to answer a question about a product."""
