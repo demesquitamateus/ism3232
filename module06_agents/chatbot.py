@@ -32,8 +32,16 @@ class SupportChatbot:
         return False
 
     def order_reply(self, user_message):
-        order_id = self.order.tool.find_order_id(user_message)
+        order_id = self.order_tool.find_order_id(user_message)
         if order_id is None:
             return "I could not find an order ID in your message. Please provide a valid order ID."
         status = self.order_tool.find_status(order_id)
         return f"Order {order_id} is {status}."
+
+    def count_user_messages(self):
+        """Return how many messages the user has sent so far."""
+        count = 0
+        for message in self.history:
+            if message["role"] == "user":
+                count += 1
+        return count

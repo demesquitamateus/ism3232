@@ -11,5 +11,7 @@ bot = SupportChatbot(
 print("Type a message, or type quit to stop.")
 user_message = input("You: ")
 while user_message != "quit":
-    print(f"{bot.name}: {response}")
+    print(f"{bot.name}: {bot.respond(user_message)}")
     user_message = input("You: ")
+
+print(f"Messages in this conversation: {len(bot.history)}")
