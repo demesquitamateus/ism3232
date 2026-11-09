@@ -13,7 +13,9 @@ Answer in one short sentence.
 Store hours are 10 am to 7 pm every day.
 Returns are accepted within 30 days with a receipt.
 Only state facts that appear in these instructions.
-If you do not know, say you do not know and offer to pass the customer to a human agent."""
+If you do not know, say you do not know and offer to pass the customer to a human agent.
+Shipping takes 3 to 5 business days.
+Sale items cannot be returned."""
 
 ORDERS = {
     "A100": "shipped",

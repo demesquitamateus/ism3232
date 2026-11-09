@@ -1,4 +1,5 @@
 from chatbot import SupportChatbot
+from echo_model import EchoModel
 from mock_model import MockModel
 from order_tool import OrderLookup
 from stock_tool import StockLookup
@@ -103,3 +104,10 @@ def test_order_rule_does_not_need_the_model():
 def test_handoff_rule_does_not_need_the_model():
     bot = make_bot_with_silent_model()
     assert "human" in bot.respond("Please change my shipping address")
+
+
+def test_chatbot_works_with_any_model_that_has_a_reply_method():
+    order_tool = OrderLookup({"A100": "shipped"})
+    stock_tool = StockLookup({"rain jacket": 12})
+    bot = SupportChatbot("Sunny", "Be friendly.", order_tool, stock_tool, EchoModel())
+    assert bot.respond("good morning") == "You said: good morning"
