@@ -4,15 +4,20 @@
 # Words that mean a person must handle the request (money or safety).
 HANDOFF_WORDS = ["refund", "cancel", "injury", "hurt"]
 
+SAFE_REPLY = (
+    "I don't have an answer to that. Please ask a staff member at the front desk."
+)
+
 
 class FaqAssistant:
-    """A mock FAQ assistant. Its replies come from simple rules, not from AI."""
+    """An FAQ assistant. Rules run first; a model handles everything else."""
 
-    def __init__(self, name, instructions, faq):
-        """Set up one assistant with its own name, instructions, tool, and history."""
+    def __init__(self, name, instructions, faq, model):
+        """Set up one assistant with its own name, instructions, tool, model, and history."""
         self.name = name  # what the assistant is called
-        self.instructions = instructions  # stored now; a real model uses it in Week 11
+        self.instructions = instructions  # now sent to the model on every call
         self.faq = faq  # the tool we were handed (composition)
+        self.model = model  # the model we were handed (composition)
         self.history = []  # each assistant starts with its own empty list
 
     def respond(self, user_message):
@@ -23,7 +28,7 @@ class FaqAssistant:
         return reply
 
     def choose_reply(self, user_message):
-        """Choose a reply with keyword rules. This is the mock part."""
+        """Use a rule when one applies. Otherwise ask the model."""
         text = user_message.lower()
         # Safety and money come first, so a person sees these requests.
         if self.needs_human(text):
@@ -34,13 +39,15 @@ class FaqAssistant:
             return self.faq.answer_for(topic)
         if "hello" in text:
             return f"Hello! I'm {self.name}. Ask me about {self.faq.list_topics()}."
-        # A question the tool couldn't match: say so, don't invent an answer.
-        if "?" in text:
-            return (
-                "I don't have an answer to that yet. "
-                f"I can answer questions about {self.faq.list_topics()}."
-            )
-        return f"I'm not sure how to help with that. Ask me about {self.faq.list_topics()}."
+        # No rule applied, so the model gets the message.
+        return self.model_reply()
+
+    def model_reply(self):
+        """Ask the model for a reply. Give a safe answer if the model has none."""
+        reply = self.model.reply(self.instructions, self.history)
+        if reply is None or reply.strip() == "":
+            return SAFE_REPLY
+        return reply
 
     def needs_human(self, text):
         """Return True if the message is about something a person must handle."""

@@ -3,6 +3,17 @@
 
 from my_assistant import FaqAssistant
 from my_tool import FaqBook
+from ollama_model import OllamaModel
+
+MODEL_NAME = "granite4.1:3b"
+
+INSTRUCTIONS = """You are Piper, a front-desk assistant for Ledge Climbing Gym.
+Answer in one short sentence.
+Beginner classes are on Saturdays at 10 am.
+Children under 14 must have an adult in the gym.
+Only state facts that appear in these instructions.
+If you do not know, say exactly: I do not know; please ask a staff member.
+Never promise refunds, bookings, or schedule changes."""
 
 ANSWERS = {
     "hours": "We're open 6 am to 10 pm on weekdays and 8 am to 8 pm on weekends.",
@@ -12,11 +23,8 @@ ANSWERS = {
 }
 
 faq = FaqBook(ANSWERS)
-assistant = FaqAssistant(
-    "Piper",
-    "You answer common questions for Ledge Climbing Gym.",
-    faq,
-)
+model = OllamaModel(MODEL_NAME)
+assistant = FaqAssistant("Piper", INSTRUCTIONS, faq, model)
 
 print("Type a message, or type quit to stop.")
 user_message = input("You: ")

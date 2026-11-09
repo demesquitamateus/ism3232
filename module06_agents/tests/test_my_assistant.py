@@ -1,57 +1,76 @@
-from my_assistant import FaqAssistant
+# test_my_assistant.py
+# Author: Mateus De Mesquita
+# These tests use fake models only, so they pass with Ollama switched off.
+
+from mock_model import MockModel
+from my_assistant import SAFE_REPLY, FaqAssistant
 from my_tool import FaqBook
 
-
-def make_assistant():
-    """Build a fresh assistant with its own tool for each test."""
-    faq = FaqBook({"hours": "6 am to 10 pm.", "price": "A day pass is $18."})
-    return FaqAssistant("Piper", "Be clear.", faq)
-
-
-def test_tool_finds_known_topic():
-    faq = FaqBook({"hours": "6 am to 10 pm."})
-    assert faq.find_topic("What are your HOURS?") == "hours"
+ANSWERS = {
+    "hours": "We're open 6 am to 10 pm on weekdays and 8 am to 8 pm on weekends.",
+    "price": "A day pass is $18 and a monthly membership is $79.",
+}
 
 
-def test_tool_returns_none_for_unknown_topic():
-    faq = FaqBook({"hours": "6 am to 10 pm."})
-    assert faq.find_topic("Do you sell shoes?") is None
+class NoneModel:
+    """A model that never has an answer, like Ollama when it is switched off."""
+
+    def reply(self, instructions, history):
+        return None
 
 
-def test_price_question_uses_the_tool():
-    assistant = make_assistant()
-    assert assistant.respond("What is the price of a day pass?") == "A day pass is $18."
+class RecordingModel:
+    """A model that remembers what it was asked, so tests can see if it was called."""
+
+    def __init__(self):
+        self.calls = []
+
+    def reply(self, instructions, history):
+        self.calls.append((instructions, list(history)))
+        return "model answer"
 
 
-def test_unanswered_question_gets_a_helpful_reply():
-    assistant = make_assistant()
-    reply = assistant.respond("Do you sell shoes?")
-    assert "don't have an answer" in reply
-    assert "hours" in reply
+def make_assistant(model):
+    return FaqAssistant("Piper", "Be brief.", FaqBook(ANSWERS), model)
 
 
-def test_refund_goes_to_a_person():
-    assistant = make_assistant()
-    assert "staff member" in assistant.respond("I want a refund for my pass")
+def test_assistant_stores_the_model():
+    model = MockModel()
+    assert make_assistant(model).model is model
 
 
-def test_unknown_statement_gets_a_safe_reply():
-    assistant = make_assistant()
-    assert "not sure" in assistant.respond("Nice weather today")
+def test_other_messages_go_to_the_model():
+    reply = make_assistant(MockModel()).respond("Do you offer lessons?")
+    assert reply == "I'm not sure how to help with that. I can check an order or stock."
 
 
-def test_history_records_role_and_content():
-    assistant = make_assistant()
-    assistant.respond("hello")
-    assistant.respond("What are your hours?")
-    assert len(assistant.history) == 4
-    assert assistant.history[0]["role"] == "user"
-    assert assistant.history[1]["role"] == "assistant"
+def test_model_gets_instructions_and_history():
+    model = RecordingModel()
+    make_assistant(model).respond("Do you offer lessons?")
+    instructions, history = model.calls[0]
+    assert instructions == "Be brief."
+    assert history[-1] == {"role": "user", "content": "Do you offer lessons?"}
 
 
-def test_two_assistants_keep_separate_histories():
-    first = make_assistant()
-    second = make_assistant()
-    first.respond("hello")
-    assert len(first.history) == 2
-    assert len(second.history) == 0
+def test_model_with_no_answer_gets_safe_reply():
+    assert make_assistant(NoneModel()).respond("Do you offer lessons?") == SAFE_REPLY
+
+
+def test_tool_answers_before_the_model():
+    model = RecordingModel()
+    reply = make_assistant(model).respond("What are your hours?")
+    assert reply == ANSWERS["hours"]
+    assert model.calls == []
+
+
+def test_handoff_happens_in_code_not_in_the_model():
+    model = RecordingModel()
+    reply = make_assistant(model).respond("I want a refund")
+    assert "staff member" in reply
+    assert model.calls == []
+
+
+def test_safe_reply_is_saved_in_history():
+    bot = make_assistant(NoneModel())
+    bot.respond("Do you offer lessons?")
+    assert bot.history[-1] == {"role": "assistant", "content": SAFE_REPLY}
